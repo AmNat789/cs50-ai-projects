@@ -22,7 +22,16 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    raise NotImplementedError
+    plays = 0
+    for r in board:
+        for cell in r:
+            if cell != EMPTY:
+                plays += 1
+
+    if plays % 2 == 0:
+        return X
+    else:
+        return O
 
 
 def actions(board):
@@ -65,3 +74,12 @@ def minimax(board):
     Returns the optimal action for the current player on the board.
     """
     raise NotImplementedError
+
+
+# TODO remove main after debugging
+if __name__ == "__main__":
+    board = [[EMPTY, EMPTY, EMPTY],
+            [EMPTY, X, EMPTY],
+            [EMPTY, EMPTY, EMPTY]]
+
+    print(player(board))
