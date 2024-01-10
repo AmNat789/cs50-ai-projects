@@ -38,8 +38,14 @@ def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    raise NotImplementedError
+    a = []
 
+    for i, row in enumerate(board):
+        for j, cell in enumerate(row):
+            if cell == EMPTY:
+                a.append([i, j])
+
+    return a
 
 def result(board, action):
     """
@@ -78,8 +84,8 @@ def minimax(board):
 
 # TODO remove main after debugging
 if __name__ == "__main__":
-    board = [[EMPTY, EMPTY, EMPTY],
-            [EMPTY, X, EMPTY],
-            [EMPTY, EMPTY, EMPTY]]
+    board = [[O, EMPTY, O],
+             [O, X, X],
+             [X, EMPTY, X]]
 
-    print(player(board))
+    print(actions(board))
