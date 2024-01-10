@@ -69,7 +69,7 @@ def main():
     if target is None:
         sys.exit("Person not found.")
 
-    path = shortest_path(source, target)
+    path = bfs_shortest_path(source, target)
 
     if path is None:
         print("Not connected.")
@@ -83,8 +83,7 @@ def main():
             movie = movies[path[i + 1][0]]["title"]
             print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
-
-def shortest_path(source, target):
+def bfs_shortest_path(source, target):
     """
     Returns the shortest list of (movie_id, person_id) pairs
     that connect the source to the target.
@@ -92,8 +91,44 @@ def shortest_path(source, target):
     If no possible path, returns None.
     """
 
-    # TODO
-    raise NotImplementedError
+    # Start with a frontier that contains the initial state
+    frontier = QueueFrontier()
+    frontier.add(Node(source, None, None))
+
+    # Start with an empty explored set
+    explored = set()
+    numExplored = 0
+
+    # Repeat:
+    while True:
+        # If the frontier is empty, then so solution
+        if frontier.empty():
+            return None
+
+        # Remove a node from the frontier
+        node = frontier.remove()
+        numExplored += 1
+
+        # If the node contains a goal state, return the solution
+        if node.state == target:
+            solution = []
+
+            while node.parent is not None:
+                solution.append([node.action,node.state])
+                node = node.parent
+            solution.reverse()
+            print(solution)
+            return solution
+
+        # Add the node that was removed to the explored set
+        explored.add(node.state)
+
+        # Expand the node that was removed, and add resulting nodes to the frontier if they aren’t already in the frontier or the explored set.
+
+        neighbors = neighbors_for_person(node.state)
+        for movie, actor in neighbors:
+            if not frontier.contains_state(actor) and actor not in explored:
+                frontier.add(Node(actor, node, movie))
 
 
 def person_id_for_name(name):
