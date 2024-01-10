@@ -2,4 +2,4 @@
 
 - Lecture 0
   - [degrees](degrees/degrees/degrees.py)
-  - 
+  - [tictactoe](tictactoe/tictactoe.py)
