@@ -48,6 +48,7 @@ def actions(board):
 
     return a
 
+
 def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
@@ -109,12 +110,54 @@ def utility(board):
         return 0
 
 
+def max_value(board, last_action):
+    if terminal(board):
+        return [utility(board), last_action]
+    v = [-math.inf, last_action]
+    for action in actions(board):
+        # v = max(v, min_value(result(board, action)))
+        new = min_value(result(board, action), action)
+        if new[0] > v[0]:
+            v = new
+    return v
+
+
+def min_value(board, last_action):
+    if terminal(board):
+        return [utility(board), last_action]
+    v = [math.inf, last_action]
+    for action in actions(board):
+        # v = min(v, max_value(result(board, action)))
+        new = max_value(result(board, action), action)
+        if new[0] < v[0]:
+            v = new
+    return v
+
+def do_minimax(board, last_action):
+    p = player(board)
+
+    if terminal(board):
+        return [utility(board), last_action]
+
+    v = [math.inf, last_action]
+    if p is X:
+        v[0] = -math.inf
+
+    for action in actions(board):
+        new = do_minimax(result(board, action), action)
+        if p is X and new[0] > v[0]:
+            v = new
+        elif p is O and new[0] < v[0]:
+            v = new
+
+    return v
+
+
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    raise NotImplementedError
-
+    return do_minimax(board, None)[1]
 
 # TODO remove main after debugging
 if __name__ == "__main__":
@@ -122,4 +165,4 @@ if __name__ == "__main__":
              [O, X, X],
              [X, EMPTY, X]]
 
-    print(winner(board))
+    print(minimax(board))
