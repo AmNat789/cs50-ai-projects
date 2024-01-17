@@ -43,12 +43,12 @@ knowledge1 = And(
 
 # Puzzle 2
 # A says "We are the same kind."
-sentence_a2 = Or(
+sentence2a = Or(
     And(AKnight, BKnight),
     And(AKnave, BKnave),
 )
 # B says "We are of different kinds."
-sentence_b2 = Or(
+sentence2b = Or(
     And(AKnight, BKnave),
     And(AKnave, BKnight),
 )
@@ -58,13 +58,13 @@ knowledge2 = And(
 
     # If A is truthful, A is a knight
     Implication(
-        sentence_a2,
+        sentence2a,
         AKnight,
     ),
 
     # If B is truthful, B is a knight
     Implication(
-        sentence_b2,
+        sentence2b,
         BKnight,
     )
 
@@ -72,11 +72,34 @@ knowledge2 = And(
 
 # Puzzle 3
 # A says either "I am a knight." or "I am a knave.", but you don't know which.
+sentence3a = Or(AKnight, AKnave)
+
 # B says "A said 'I am a knave'."
+sentence3b1 = AKnave
+
 # B says "C is a knave."
+sentence3b2 = CKnave
+
 # C says "A is a knight."
+sentence3c = AKnight
+
+
 knowledge3 = And(
-    # TODO
+    base_rules,
+
+    # If A is truthful, A is a Knight
+    Implication(sentence3a, AKnight),
+
+    # If both of B's statements are trutuful, B is a Knight
+    Implication(
+        And(sentence3b1, sentence3b2),
+        BKnight
+    ),
+
+    # If C is truthful, C is a knight
+    Implication(
+        sentence3c, CKnight
+    )
 )
 
 
