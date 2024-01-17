@@ -1,3 +1,4 @@
+import copy
 import itertools
 import random
 
@@ -105,27 +106,35 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        raise NotImplementedError
+
+        if len(self.cells) == self.count and self.count > 0:
+            return self.cells
+        return set()
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        raise NotImplementedError
+        if self.count == 0:
+            return self.cells
+        return set()
 
     def mark_mine(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
-        raise NotImplementedError
+        if cell in self.cells:
+            self.cells.remove(cell)
+            self.count -= 1
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        raise NotImplementedError
+        if cell in self.cells:
+            self.cells.remove(cell)
 
 
 class MinesweeperAI():
@@ -182,7 +191,53 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        raise NotImplementedError
+
+        # 1
+        self.moves_made.add(cell)
+
+        # 2
+        self.mark_safe(cell)
+
+        # 3
+        # -> loop through neighbors to find any undetermined cells
+        verified_mines = 0
+        undetermined_cells = []
+        for i in range(cell[0] - 1, cell[0] + 2):
+            for j in range(cell[1] - 1, cell[1] + 2):
+                if i < 0 or i >= self.height or j < 0 or j >= self.width:
+                    continue
+
+                if (i, j) in self.mines:
+                    verified_mines += 1
+
+                if (i, j) not in self.safes and (i, j) not in self.mines:
+                    undetermined_cells.append((i, j))
+
+        # -> make a new sentence with the undetermined cells
+        _sentence = Sentence(undetermined_cells, count - verified_mines)
+        self.knowledge.append(_sentence)
+
+        # 4
+        for sentence in self.knowledge:
+            possible_mines = copy.deepcopy(sentence.known_mines())
+            if possible_mines:
+                for cell in possible_mines:
+                    self.mark_mine(cell)
+
+            possible_safes = copy.deepcopy(sentence.known_safes())
+            if possible_safes:
+                for cell in possible_safes:
+                    self.mark_safe(cell)
+
+        # 5
+        for sentence in self.knowledge:
+            if _sentence != sentence and _sentence.cells.issubset(sentence.cells) and count > 0 and _sentence.count > 0:
+                subset = sentence.cells.difference(_sentence.cells)
+                subset_sentence = Sentence(
+                    list(subset),
+                    sentence.count - _sentence.count
+                )
+                self.knowledge.append(subset_sentence)
 
     def make_safe_move(self):
         """
@@ -193,7 +248,12 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        raise NotImplementedError
+
+        unplayed_safe_moves = self.safes.difference(self.moves_made)
+        if len(unplayed_safe_moves) > 0:
+            return list(unplayed_safe_moves)[0]
+        else:
+            return None
 
     def make_random_move(self):
         """
@@ -202,4 +262,14 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+
+        playable_moves = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if (i, j) not in self.moves_made and (i, j) not in self.mines:
+                    playable_moves.append((i, j))
+
+        if len(playable_moves) > 0:
+            rand_i = random.randint(0, len(playable_moves) - 1)
+            return playable_moves[rand_i]
+        return None
