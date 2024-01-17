@@ -9,18 +9,22 @@ BKnave = Symbol("B is a Knave")
 CKnight = Symbol("C is a Knight")
 CKnave = Symbol("C is a Knave")
 
-# Puzzle 0
-# PROMPT: A says "I am both a knight and a knave."
-sentence0 = And(AKnight, AKnave)
+players = ["A", "B", "C"]
 
-# A is a knight or knave, but not both
-rules = And(
-    Or(AKnight, AKnave),
-    Biconditional(AKnight, Not(AKnave))
+# Base Rules for game
+# All players must be either a Knight or a Knave, but not both
+base_rules = And(
+    Biconditional(AKnight, Not(AKnave)),
+    Biconditional(BKnight, Not(BKnave)),
+    Biconditional(CKnight, Not(CKnave)),
 )
 
+# Puzzle 0
+# A says "I am both a knight and a knave."
+sentence0 = And(AKnight, AKnave)
+
 knowledge0 = And(
-    rules,
+    base_rules,
 
     # if the sentence is truthful, A is a Knight
     Biconditional(sentence0, AKnight)
@@ -29,15 +33,41 @@ knowledge0 = And(
 # Puzzle 1
 # A says "We are both knaves."
 # B says nothing.
+sentence1 = And(AKnave, BKnave)
+
 knowledge1 = And(
-    # TODO
+    base_rules,
+    # if the sentence is truthful, A is a Knight
+    Biconditional(sentence0, AKnight)
 )
 
 # Puzzle 2
 # A says "We are the same kind."
+sentence_a2 = Or(
+    And(AKnight, BKnight),
+    And(AKnave, BKnave),
+)
 # B says "We are of different kinds."
+sentence_b2 = Or(
+    And(AKnight, BKnave),
+    And(AKnave, BKnight),
+)
+
 knowledge2 = And(
-    # TODO
+    base_rules,
+
+    # If A is truthful, A is a knight
+    Implication(
+        sentence_a2,
+        AKnight,
+    ),
+
+    # If B is truthful, B is a knight
+    Implication(
+        sentence_b2,
+        BKnight,
+    )
+
 )
 
 # Puzzle 3
