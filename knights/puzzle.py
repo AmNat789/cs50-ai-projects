@@ -10,9 +10,20 @@ CKnight = Symbol("C is a Knight")
 CKnave = Symbol("C is a Knave")
 
 # Puzzle 0
-# A says "I am both a knight and a knave."
+# PROMPT: A says "I am both a knight and a knave."
+sentence0 = And(AKnight, AKnave)
+
+# A is a knight or knave, but not both
+rules = And(
+    Or(AKnight, AKnave),
+    Biconditional(AKnight, Not(AKnave))
+)
+
 knowledge0 = And(
-    # TODO
+    rules,
+
+    # if the sentence is truthful, A is a Knight
+    Biconditional(sentence0, AKnight)
 )
 
 # Puzzle 1
