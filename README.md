@@ -3,3 +3,6 @@
 - Lecture 0
   - [degrees](degrees/degrees/degrees.py)
   - [tictactoe](tictactoe/tictactoe.py)
+
+- Lecture 1
+  - [knights](knights/puzzle.py)
