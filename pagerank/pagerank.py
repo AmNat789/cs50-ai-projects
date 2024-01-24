@@ -1,3 +1,5 @@
+import copy
+import math
 import os
 import random
 import re
@@ -91,13 +93,14 @@ def sample_pagerank(corpus, damping_factor, n):
     page = random.choice(pages)
 
     for i in range(n):
-        tm = transition_model(corpus, page,damping_factor)
+        tm = transition_model(corpus, page, damping_factor)
         probabilities = tm.values()
 
         page = random.choices(pages, weights=list(probabilities))[0]
         res[page] += (1 / n)
 
     return res
+
 
 def iterate_pagerank(corpus, damping_factor):
     """
@@ -108,7 +111,27 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    total_pages = len(corpus)
+    res = {p: 1 / total_pages for p in corpus}
+
+    diff = math.inf
+    min_diff = 0.001
+    base_probability = (1 - damping_factor) / total_pages
+
+    while diff > min_diff:
+        old = copy.deepcopy(res)
+        for page in corpus:
+            res[page] = base_probability + sum_of_linking_pages(corpus, page, res, damping_factor)
+            diff = abs(old[page] - res[page])
+    return res
+
+
+def sum_of_linking_pages(corpus, page, distributions, damping_factor):
+    total = 0.0
+    for p in corpus:
+        if page in corpus[p]:
+            total += distributions[p] / len(corpus[p])
+    return damping_factor * total
 
 
 if __name__ == "__main__":
