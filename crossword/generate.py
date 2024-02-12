@@ -1,6 +1,6 @@
 import copy
 import sys
-
+import queue
 from crossword import *
 
 
@@ -103,7 +103,7 @@ class CrosswordCreator():
 
         domain_copy = copy.deepcopy(self.domains)
         for variable in self.crossword.variables:
-            for word in self.domains[variable]:
+            for word in self.crossword.words:
                 if variable.length != len(word):
                     domain_copy[variable].remove(word)
 
@@ -118,7 +118,21 @@ class CrosswordCreator():
         Return True if a revision was made to the domain of `x`; return
         False if no revision was made.
         """
-        raise NotImplementedError
+        domain_copy = copy.deepcopy(self.domains)
+
+        revised = False
+        overlap = self.crossword.overlaps[x, y]
+        for x_word in self.domains[x]:
+            x_word_satisfies_constraint = False
+            for y_word in self.domains[y]:
+                if x_word[overlap[0]] == y_word[overlap[1]]:
+                    x_word_satisfies_constraint = True
+                    break
+            if not x_word_satisfies_constraint:
+                domain_copy[x].remove(x_word)
+                revised = True
+        self.domains = domain_copy
+        return revised
 
     def ac3(self, arcs=None):
         """
@@ -129,7 +143,28 @@ class CrosswordCreator():
         Return True if arc consistency is enforced and no domains are empty;
         return False if one or more domains end up empty.
         """
-        raise NotImplementedError
+
+        q = queue.Queue()
+
+        # if arcs is not None, add them to the queue
+        if arcs is not None:
+            list(map(q.put, arcs))
+        # if no arcs are provided, add all overlaps as arcs
+        else:
+            for variable in self.crossword.variables:
+                neighbors = self.crossword.neighbors(variable)
+                for neighbor in neighbors:
+                    q.put((variable, neighbor))
+
+        while not q.empty():
+            (X, Y) = q.get()
+            if self.revise(X, Y):
+                if len(self.domains[X]) == 0:
+                    return False
+                for Z in self.crossword.neighbors(X):
+                    if not Z == Y:
+                        q.put((Z, X))
+        return True
 
     def assignment_complete(self, assignment):
         """
@@ -177,7 +212,6 @@ class CrosswordCreator():
 
 
 def main():
-
     # Check usage
     if len(sys.argv) not in [3, 4]:
         sys.exit("Usage: python generate.py structure words [output]")
