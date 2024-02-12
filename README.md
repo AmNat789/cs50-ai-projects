@@ -13,4 +13,5 @@ All project descriptions can be found [here](https://cs50.harvard.edu/ai/2024/pr
 - Project 2
   - [pageRank](pagerank/pagerank.py)
   - [heredity](heredity/heredity.py)
-
+- Project 3
+  - [crossword](crossword/generate.py)
