@@ -59,7 +59,37 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-    raise NotImplementedError
+    with open(filename) as f:
+        reader = csv.DictReader(f)
+
+        months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        evidence = []
+        labels = []
+
+        for row in reader:
+            data = []
+            data.append(int(row["Administrative"]))
+            data.append(float(row["Administrative_Duration"]))
+            data.append(int(row["Informational"]))
+            data.append(float(row["Informational_Duration"]))
+            data.append(int(row["ProductRelated"]))
+            data.append(float(row["ProductRelated_Duration"]))
+            data.append(float(row["BounceRates"]))
+            data.append(float(row["ExitRates"]))
+            data.append(float(row["PageValues"]))
+            data.append(float(row["SpecialDay"]))
+            data.append(months.index(row["Month"]))
+            data.append(int(row["OperatingSystems"]))
+            data.append(int(row["Browser"]))
+            data.append(int(row["Region"]))
+            data.append(int(row["TrafficType"]))
+            data.append(int(row["VisitorType"] == "Returning_Visitor"))
+            data.append(int(row["Weekend"] == "TRUE"))
+
+            evidence.append(data)
+            labels.append(int(row["Revenue"] == "TRUE"))
+
+        return evidence, labels
 
 
 def train_model(evidence, labels):
@@ -67,7 +97,10 @@ def train_model(evidence, labels):
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    raise NotImplementedError
+    model = KNeighborsClassifier(n_neighbors=1)
+    model.fit(evidence,labels)
+
+    return model
 
 
 def evaluate(labels, predictions):
@@ -85,8 +118,26 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+    total_positives = 0
+    accurate_positives = 0
 
+    total_negatives = 0
+    accurate_negatives = 0
+
+    for i, label in enumerate(labels):
+        if label == 1:
+            total_positives += 1
+            if label == predictions[i]:
+                accurate_positives += 1
+        else:
+            total_negatives += 1
+            if label == predictions[i]:
+                accurate_negatives += 1
+
+    sensitivity = accurate_positives / total_positives
+    specificity = accurate_negatives / total_negatives
+
+    return sensitivity, specificity
 
 if __name__ == "__main__":
     main()
