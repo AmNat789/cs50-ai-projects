@@ -1,8 +1,11 @@
 import cv2
+# import keras.utils
 import numpy as np
 import os
 import sys
 import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, Dropout
 
 from sklearn.model_selection import train_test_split
 
@@ -58,7 +61,20 @@ def load_data(data_dir):
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
     """
-    raise NotImplementedError
+    images = []
+    labels = []
+
+    for label in os.listdir(data_dir):
+        for file in os.listdir(os.path.join(data_dir, label)):
+            image = cv2.imread(os.path.join(data_dir, label,file))
+            image = cv2.resize(image, (IMG_WIDTH, IMG_HEIGHT))
+            # Normalize values from 0 - 1
+            image = image / 255
+            images.append(image)
+            labels.append(int(label))
+
+    return images, labels
+
 
 
 def get_model():
@@ -67,7 +83,34 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
+    model = Sequential(
+        [
+            # Convolutional layer creating 32 filters, with a shape of 3x3
+            Conv2D(32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)),
+
+            # Pooling layer using a 2x2 pool size
+            MaxPooling2D(pool_size=(2, 2)),
+
+            # Second Convolution and Pooling layers
+            Conv2D(32, (3, 3), activation="relu"),
+            MaxPooling2D(pool_size=(2, 2)),
+
+            Flatten(),
+
+            # Hidden Layers
+            Dense(units=128, activation='relu'),
+            Dropout(0.5),
+
+            # Output Layer
+            Dense(units=NUM_CATEGORIES, activation='sigmoid'),
+        ], name="traffic"
+    )
+    model.compile(
+        loss="categorical_crossentropy",
+        optimizer="adam",
+        metrics=["accuracy"]
+    )
+    return model
 
 
 if __name__ == "__main__":
