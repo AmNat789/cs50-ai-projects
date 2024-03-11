@@ -20,3 +20,7 @@ All project descriptions can be found [here](https://cs50.harvard.edu/ai/2024/pr
 - Project 4: Learning
   - [shopping](shopping/shopping.py)
   - [nim](nim/nim.py)
+
+- Project 5: Neural Networks
+  - [traffic](traffic/traffic.py)
+    - Download and unzip [data set](https://cdn.cs50.net/ai/2023/x/projects/5/gtsrb.zip) and place in the `/traffic` directory
