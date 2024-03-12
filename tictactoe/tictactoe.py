@@ -90,11 +90,11 @@ def terminal(board):
         return True
 
     # Check if there are any empty cells
-
     for r in board:
         for cell in r:
             if cell is EMPTY:
                 return False
+    return True
 
 
 def utility(board):
@@ -102,62 +102,66 @@ def utility(board):
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
     w = winner(board)
-    if w is X:
+    if w == X:
         return 1
-    elif w is O:
+    elif w == O:
         return -1
     else:
         return 0
 
 
-def max_value(board, last_action):
+def max_value(board):
     if terminal(board):
-        return [utility(board), last_action]
-    v = [-math.inf, last_action]
-    for action in actions(board):
-        # v = max(v, min_value(result(board, action)))
-        new = min_value(result(board, action), action)
-        if new[0] > v[0]:
-            v = new
-    return v
+        return utility(board), None
 
-
-def min_value(board, last_action):
-    if terminal(board):
-        return [utility(board), last_action]
-    v = [math.inf, last_action]
-    for action in actions(board):
-        # v = min(v, max_value(result(board, action)))
-        new = max_value(result(board, action), action)
-        if new[0] < v[0]:
-            v = new
-    return v
-
-def do_minimax(board, last_action):
-    p = player(board)
-
-    if terminal(board):
-        return [utility(board), last_action]
-
-    v = [math.inf, last_action]
-    if p is X:
-        v[0] = -math.inf
+    v = -math.inf
+    best_action = None
 
     for action in actions(board):
-        new = do_minimax(result(board, action), action)
-        if p is X and new[0] > v[0]:
-            v = new
-        elif p is O and new[0] < v[0]:
-            v = new
+        new_v, new_action = min_value(result(board, action))
+        if new_v > v:
+            v = new_v
+            best_action = action
+            if v == 1:
+                break
 
-    return v
+    return v, best_action
+
+
+def min_value(board):
+    if terminal(board):
+        return utility(board), None
+
+    v = math.inf
+    best_action = None
+
+    for action in actions(board):
+        new_v, new_action = max_value(result(board, action))
+        if new_v < v:
+            v = new_v
+            best_action = action
+            if v == -1:
+                break
+
+    return v, best_action
 
 
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    return do_minimax(board, None)[1]
+    p = player(board)
+
+    if terminal(board):
+        return None
+    else:
+        if p is X:
+            v, action = max_value(board)
+            return action
+        else:
+            v, action = min_value(board)
+            return action
+
 
 # TODO remove main after debugging
 if __name__ == "__main__":
